@@ -1,12 +1,18 @@
 // Initialize AOS (Animate On Scroll)
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize AOS
-    AOS.init({
-        duration: 800,
-        easing: 'ease-in-out',
-        once: false,
-        mirror: true
-    });
+    // Initialize AOS when available, or reveal [data-aos] elements as fallback
+    if (typeof AOS !== 'undefined' && typeof AOS.init === 'function') {
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: false,
+            mirror: true
+        });
+    } else {
+        document.querySelectorAll('[data-aos]').forEach(el => {
+            el.classList.add('aos-animate');
+        });
+    }
     
     // Smooth scrolling for anchor links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -69,11 +75,17 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     ];
     
-    // Function to update the word card with a random word
+    let lastWordIndex = 0;
+
+    // Function to update the word card with a different word
     function updateWordCard() {
         if (!wordCard) return;
         
-        const randomIndex = Math.floor(Math.random() * words.length);
+        let randomIndex = Math.floor(Math.random() * words.length);
+        if (words.length > 1 && randomIndex === lastWordIndex) {
+            randomIndex = (randomIndex + 1) % words.length;
+        }
+        lastWordIndex = randomIndex;
         const wordData = words[randomIndex];
         
         const wordTitle = wordCard.querySelector('h2');
@@ -87,10 +99,10 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Update content after fade out
         setTimeout(() => {
-            wordTitle.textContent = wordData.word;
-            wordType.innerHTML = `<em>${wordData.type}</em> | <span class="pronunciation">${wordData.pronunciation}</span>`;
-            definition.textContent = wordData.definition;
-            example.textContent = `"${wordData.example}"`;
+            if (wordTitle) wordTitle.textContent = wordData.word;
+            if (wordType) wordType.innerHTML = `<em>${wordData.type}</em> | <span class="pronunciation">${wordData.pronunciation}</span>`;
+            if (definition) definition.textContent = wordData.definition;
+            if (example) example.textContent = `"${wordData.example}"`;
             
             // Apply fade in effect
             wordCard.style.opacity = '1';
@@ -184,12 +196,15 @@ document.addEventListener('DOMContentLoaded', function() {
     
     createFloatingElements();
     
-    // Download button action
+    // Download button action (only for in-page anchor triggers, not external links)
     const downloadButtons = document.querySelectorAll('.primary-btn, .download-btn');
     downloadButtons.forEach(button => {
-        button.addEventListener('click', function() {
+        const href = button.getAttribute('href') || '';
+        if (href && !href.startsWith('#')) return;
+        button.addEventListener('click', function(e) {
             const downloadSection = document.querySelector('#download');
             if (downloadSection) {
+                e.preventDefault();
                 window.scrollTo({
                     top: downloadSection.offsetTop - 80,
                     behavior: 'smooth'
