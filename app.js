@@ -198,34 +198,54 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Add typing effect to the hero headline
+    // Add typing effect to the hero headline without corrupting child HTML elements
     function typeEffect() {
         const heroHeadline = document.querySelector('.hero h1');
         if (!heroHeadline) return;
         
-        const originalText = heroHeadline.innerHTML;
-        
         // Skip if already processed
         if (heroHeadline.classList.contains('typed')) return;
-        
         heroHeadline.classList.add('typed');
+        
+        const segments = Array.from(heroHeadline.childNodes).map(node => ({
+            isElement: node.nodeType === Node.ELEMENT_NODE,
+            tagName: node.nodeType === Node.ELEMENT_NODE ? node.tagName : null,
+            className: node.nodeType === Node.ELEMENT_NODE ? node.className : '',
+            text: node.textContent || ''
+        }));
         
         // Create the typing effect container
         const typingContainer = document.createElement('div');
         typingContainer.classList.add('typing-effect');
         
+        const targetNodes = segments.map(seg => {
+            if (seg.isElement && seg.tagName) {
+                const el = document.createElement(seg.tagName);
+                if (seg.className) el.className = seg.className;
+                typingContainer.appendChild(el);
+                return el;
+            }
+            const textNode = document.createTextNode('');
+            typingContainer.appendChild(textNode);
+            return textNode;
+        });
+        
         // Replace the hero headline with the typing container
         heroHeadline.innerHTML = '';
         heroHeadline.appendChild(typingContainer);
         
-        // Set up typing animation
-        let i = 0;
+        let segIdx = 0;
+        let charIdx = 0;
         const speed = 50; // typing speed
         
         function typeWriter() {
-            if (i < originalText.length) {
-                typingContainer.innerHTML += originalText.charAt(i);
-                i++;
+            while (segIdx < segments.length && charIdx >= segments[segIdx].text.length) {
+                segIdx++;
+                charIdx = 0;
+            }
+            if (segIdx < segments.length) {
+                targetNodes[segIdx].textContent += segments[segIdx].text.charAt(charIdx);
+                charIdx++;
                 setTimeout(typeWriter, speed);
             }
         }
