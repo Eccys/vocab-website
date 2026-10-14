@@ -284,7 +284,67 @@
                     }
                 });
             }
+
+            const dailyWords = [
+                {
+                    word: 'chiaroscuro',
+                    pos: 'noun',
+                    phonetic: 'kee-ah-roh-SKYOOR-oh',
+                    meaning: 'Chiaroscuro is a visual effect created by strong contrasts between light and dark.',
+                    example: '// The artist used chiaroscuro to add drama to his painting.',
+                    contextTitle: 'chiaroscuro in context',
+                    context: 'Used in art, photography, and literature to describe dramatic contrasts.',
+                    didYouKnow: "This term comes from Italian and literally means 'light-dark.' It was popularized by Renaissance artists like Caravaggio and Rembrandt to create dramatic depth in paintings."
+                },
+                {
+                    word: 'ephemeral',
+                    pos: 'adjective',
+                    phonetic: 'ih-FEM-er-uhl',
+                    meaning: 'Ephemeral describes something that lasts for a very short time.',
+                    example: '// The beauty of cherry blossoms is ephemeral, lasting only a few days.',
+                    contextTitle: 'ephemeral in context',
+                    context: 'Often used to describe fleeting natural phenomena, trends, or digital media.',
+                    didYouKnow: "Derived from the Greek word 'ephemeros,' meaning 'lasting only one day,' originally referring to short-lived insects like mayflies."
+                },
+                {
+                    word: 'serendipity',
+                    pos: 'noun',
+                    phonetic: 'ser-uhn-DIP-ih-tee',
+                    meaning: 'Serendipity is the occurrence of events by chance in a happy or beneficial way.',
+                    example: '// Finding that rare book in a small shop was pure serendipity.',
+                    contextTitle: 'serendipity in context',
+                    context: 'Commonly used when describing fortunate scientific discoveries or unexpected life events.',
+                    didYouKnow: "Coined by Horace Walpole in 1754 from the Persian fairy tale 'The Three Princes of Serendip,' whose heroes were always making discoveries by accidents and sagacity."
+                }
+            ];
+
+            const navButtons = document.querySelectorAll('.nav-button');
+            const wordHeading = document.querySelector('.word-card .word');
+            const wordPronunciation = document.querySelector('.word-card .pronunciation');
+            const sectionTitles = document.querySelectorAll('.section-title');
+            const exampleEl = document.querySelector('.example');
+
+            navButtons.forEach(function(btn, idx) {
+                btn.addEventListener('click', function() {
+                    const entry = dailyWords[idx % dailyWords.length];
+                    navButtons.forEach(function(b) { b.classList.remove('active'); });
+                    btn.classList.add('active');
+                    if (wordHeading) wordHeading.textContent = entry.word;
+                    if (wordPronunciation) {
+                        wordPronunciation.innerHTML = entry.pos + ' | <span class="phonetic">' + entry.phonetic + '</span>';
+                    }
+                    if (definitions.length >= 3) {
+                        definitions[0].textContent = entry.meaning;
+                        definitions[1].textContent = entry.context;
+                        definitions[2].textContent = entry.didYouKnow;
+                    }
+                    if (exampleEl) exampleEl.textContent = entry.example;
+                    if (sectionTitles.length >= 2) {
+                        sectionTitles[1].textContent = entry.contextTitle;
+                    }
+                });
+            });
         })();
     </script>
 </body>
-</html> 
+</html>
